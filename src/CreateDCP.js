@@ -3,21 +3,12 @@ import { Container, Row, Col, Button, Form, FormGroup, Label, Input } from 'reac
 import axios from 'axios';
 
 const CreateDCP = () => {
-  const [dcpState, setDCPState] = useState('');
+  //prettier-ignore
+  const initialState = {site: '', o: '', a: '', s1: '', s2: '', s3: '', s4: '', s5: '', c: '', cpid: '', ts: ''};
   const [sites, setSites] = useState([]);
-  const [userInput, setUserInput] = useReducer((state, newState) => ({ ...state, ...newState }), {
-    site: '',
-    o: '',
-    a: '',
-    s1: '',
-    s2: '',
-    s3: '',
-    s4: '',
-    s5: '',
-    c: '',
-    cpid: '',
-    ts: ''
-  });
+  const [dcpState, setDCPState] = useState('');
+  const formReducer = (state, action) => ({ ...state, ...action });
+  const [state, dispatch] = useReducer(formReducer, initialState);
 
   useEffect(() => {
     async function fetchData() {
@@ -31,9 +22,9 @@ const CreateDCP = () => {
     fetchData();
   }, []);
 
-  const urlParam = userInput => {
+  const urlParam = state => {
     let params = '';
-    for (let [key, value] of Object.entries(userInput)) {
+    for (let [key, value] of Object.entries(state)) {
       if (key !== 'site' && value !== '') {
         params += `&${key}=${value}`;
       } else {
@@ -47,10 +38,11 @@ const CreateDCP = () => {
     const { name, value } = event.target;
 
     console.log(name, value);
-    
-    setUserInput({ [name]: value });
-    setDCPState(`https://${userInput.site}/?${urlParam(userInput)}`);
-    console.log(userInput.site);
+
+    dispatch({ [name]: value });
+    // TODO: Reads previous state behind by one
+    setDCPState(`https://${state.site}/?${urlParam(state)}`);
+    console.log(state.site);
   };
 
   const save = () => {
@@ -93,20 +85,20 @@ const CreateDCP = () => {
               <Col>
                 <FormGroup>
                   <Label>Offer ID:</Label>
-                  <Input type="text" name="o" value={userInput.o} onChange={handleInputChange} />
+                  <Input type="text" name="o" value={state.o} onChange={handleInputChange} />
                 </FormGroup>
               </Col>
               <Col>
                 <FormGroup>
                   <Label>Affiliate ID:</Label>
-                  <Input type="text" name="a" value={userInput.a} onChange={handleInputChange} />
+                  <Input type="text" name="a" value={state.a} onChange={handleInputChange} />
                 </FormGroup>
               </Col>
               <Col>
                 <FormGroup>
                   <Label>
                     Campaign ID:
-                    <Input type="text" name="cpid" value={userInput.cpid} onChange={handleInputChange} />
+                    <Input type="text" name="cpid" value={state.cpid} onChange={handleInputChange} />
                   </Label>
                 </FormGroup>
               </Col>
@@ -114,7 +106,7 @@ const CreateDCP = () => {
                 <FormGroup>
                   <Label>
                     Creative ID:
-                    <Input type="text" name="c" value={userInput.c} onChange={handleInputChange} />
+                    <Input type="text" name="c" value={state.c} onChange={handleInputChange} />
                   </Label>
                 </FormGroup>
               </Col>
@@ -122,7 +114,7 @@ const CreateDCP = () => {
                 <FormGroup>
                   <Label>
                     Traffic Source:
-                    <Input type="text" name="ts" value={userInput.ts} onChange={handleInputChange} />
+                    <Input type="text" name="ts" value={state.ts} onChange={handleInputChange} />
                   </Label>
                 </FormGroup>
               </Col>
@@ -132,7 +124,7 @@ const CreateDCP = () => {
                 <FormGroup>
                   <Label>
                     S1:
-                    <Input type="text" name="s1" value={userInput.s1} onChange={handleInputChange} />
+                    <Input type="text" name="s1" value={state.s1} onChange={handleInputChange} />
                   </Label>
                 </FormGroup>
               </Col>
@@ -140,7 +132,7 @@ const CreateDCP = () => {
                 <FormGroup>
                   <Label>
                     S2:
-                    <Input type="text" name="s2" value={userInput.s2} onChange={handleInputChange} />
+                    <Input type="text" name="s2" value={state.s2} onChange={handleInputChange} />
                   </Label>
                 </FormGroup>
               </Col>
@@ -148,7 +140,7 @@ const CreateDCP = () => {
                 <FormGroup>
                   <Label>
                     S3:
-                    <Input type="text" name="s3" value={userInput.s3} onChange={handleInputChange} />
+                    <Input type="text" name="s3" value={state.s3} onChange={handleInputChange} />
                   </Label>
                 </FormGroup>
               </Col>
@@ -156,7 +148,7 @@ const CreateDCP = () => {
                 <FormGroup>
                   <Label>
                     S4:
-                    <Input type="text" name="s4" value={userInput.s4} onChange={handleInputChange} />
+                    <Input type="text" name="s4" value={state.s4} onChange={handleInputChange} />
                   </Label>
                 </FormGroup>
               </Col>
@@ -164,7 +156,7 @@ const CreateDCP = () => {
                 <FormGroup>
                   <Label>
                     S5:
-                    <Input type="text" name="s5" value={userInput.s5} onChange={handleInputChange} />
+                    <Input type="text" name="s5" value={state.s5} onChange={handleInputChange} />
                   </Label>
                 </FormGroup>
               </Col>

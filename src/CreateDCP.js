@@ -5,53 +5,56 @@ import axios from 'axios';
 const CreateDCP = () => {
   //prettier-ignore
   const initialState = {site: '', o: '', a: '', s1: '', s2: '', s3: '', s4: '', s5: '', c: '', cpid: '', ts: ''};
-  const [sites, setSites] = useState([]);
-  const [dcpState, setDCPState] = useState('');
+  const [sites, setSites] = useState([]); // stores sites from axios call
+  const [url, setUrl] = useState(''); // stores url once selected from dropdown. Creates full url and adds query ? mark
+  const [dcpState, setDCPState] = useState(''); // stores full clipboard URL
   const formReducer = (state, action) => ({ ...state, ...action });
-  const [state, dispatch] = useReducer(formReducer, initialState);
+  const [state, dispatch] = useReducer(formReducer, initialState); // stores the url params
+
+  // creates url from updated dcp state
+  const urlParam = state => {
+    const stateValues = Object.keys(state).map(key => (state[key] !== '' ? '&' + key + '=' + state[key] : '')).join('');
+    console.log(stateValues);
+    if (state.site !== '') {
+      return stateValues;
+    } else {
+      return ''
+    }
+  };
+
+  const handleInputChange = event => {
+    const { name, value } = event.target;
+    dispatch({ [name]: value });
+  };
+  const handleSiteChange = event => {
+    const { value } = event.target;
+    setUrl(`https://${value}/?`);
+  };
+
+  const save = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(dcpState.replace('?&', '?'));
+    } else {
+      alert('Sorry!! Click to Copy to Clipboard is not available for your browser. Please manually copy your number');
+    }
+  };
 
   useEffect(() => {
     async function fetchData() {
       try {
         const result = await axios('https://s3-us-west-1.amazonaws.com/sc.frontend/sites.json');
+
+        // set sites data
         setSites(result.data);
+
+        // update url state
+        setDCPState(`https://${state.site}/?` + urlParam(state));
       } catch (error) {
         console.error(error);
       }
     }
     fetchData();
-  }, []);
-
-  const urlParam = state => {
-    let params = '';
-    for (let [key, value] of Object.entries(state)) {
-      if (key !== 'site' && value !== '') {
-        params += `&${key}=${value}`;
-      } else {
-        params += '';
-      }
-    }
-    return params;
-  };
-
-  const handleInputChange = event => {
-    const { name, value } = event.target;
-
-    console.log(name, value);
-
-    dispatch({ [name]: value });
-    // TODO: Reads previous state behind by one
-    setDCPState(`https://${state.site}/?${urlParam(state)}`);
-    console.log(state.site);
-  };
-
-  const save = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(dcpState);
-    } else {
-      alert('Sorry!! Click to Copy to Clipboard is not available for your browser. Please manually copy your number');
-    }
-  };
+  }, [state, url]);
 
   return (
     <Container>
@@ -167,7 +170,7 @@ const CreateDCP = () => {
       <Row>
         <Col>
           <Label>Your Link:</Label>
-          <div className="link-container">{dcpState}</div>
+          <div className="link-container">{dcpState.replace('?&', '?')}</div>
         </Col>
       </Row>
       <Row>

@@ -5,27 +5,18 @@ import axios from 'axios';
 const CreateDCP = () => {
   //prettier-ignore
   const initialState = {site: '', o: '', a: '', s1: '', s2: '', s3: '', s4: '', s5: '', c: '', cpid: '', ts: ''};
-  const [sites, setSites] = useState([]);
-  const [dcpState, setDCPState] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [sites, setSites] = useState([]); // stores sites from axios call
+  const [dcpState, setDCPState] = useState(''); // stores full clipboard URL
   const formReducer = (state, action) => ({ ...state, ...action });
-  const [state, dispatch] = useReducer(formReducer, initialState);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const result = await axios('https://s3-us-west-1.amazonaws.com/sc.frontend/sites.json');
-        setSites(result.data);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    fetchData();
-  }, []);
+  const [state, dispatch] = useReducer(formReducer, initialState); // stores the url params
 
   const urlParam = state => {
     let params = '';
     for (let [key, value] of Object.entries(state)) {
-      if (key !== 'site' && value !== '') {
+      if (key === 'site' && value !== '') {
+        params += `https://${value}/?`;
+      } else if (key !== 'site' && value !== '') {
         params += `&${key}=${value}`;
       } else {
         params += '';
@@ -36,34 +27,55 @@ const CreateDCP = () => {
 
   const handleInputChange = event => {
     const { name, value } = event.target;
-
-    console.log(name, value);
-
     dispatch({ [name]: value });
-    // TODO: Reads previous state behind by one
-    setDCPState(`https://${state.site}/?${urlParam(state)}`);
-    console.log(state.site);
   };
 
   const save = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(dcpState);
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+      navigator.clipboard.writeText(dcpState.replace('?&', '?'));
     } else {
       alert('Sorry!! Click to Copy to Clipboard is not available for your browser. Please manually copy your number');
     }
   };
+
+  const restart = () => {
+    document.getElementById('form').reset();
+    dispatch(initialState);
+    setDCPState('');
+  };
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const result = await axios('https://s3-us-west-1.amazonaws.com/sc.frontend/sites.json');
+
+        // set sites data
+        setSites(result.data);
+
+        // update url state
+        setDCPState(urlParam(state));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchData();
+  }, [state]);
 
   return (
     <Container>
       <Row>
         <Col>
           <h3 className="header">CakeKiller's DCP Link Creator</h3>
-          <p>Clicking "Generate New DCP Link" stores the link in your clipboard for easy pasting to other applications</p>
+          <p>Clicking "Copy to Clipboard" stores the link in your clipboard for easy pasting.</p>
         </Col>
       </Row>
       <Row>
         <Col>
-          <Form>
+          <Form id="form">
             <Row>
               <Col sm="12" md={{ size: 8, offset: 2 }}>
                 <FormGroup>
@@ -82,19 +94,23 @@ const CreateDCP = () => {
               </Col>
             </Row>
             <Row>
-              <Col>
+              <Col lg={{ size: 2, offset: 1 }} xs="12">
                 <FormGroup>
-                  <Label>Offer ID:</Label>
-                  <Input type="text" name="o" value={state.o} onChange={handleInputChange} />
+                  <Label>
+                    Offer ID:
+                    <Input type="text" name="o" value={state.o} onChange={handleInputChange} />
+                  </Label>
                 </FormGroup>
               </Col>
-              <Col>
+              <Col lg="2" xs="12">
                 <FormGroup>
-                  <Label>Affiliate ID:</Label>
-                  <Input type="text" name="a" value={state.a} onChange={handleInputChange} />
+                  <Label>
+                    Affiliate ID:
+                    <Input type="text" name="a" value={state.a} onChange={handleInputChange} />
+                  </Label>
                 </FormGroup>
               </Col>
-              <Col>
+              <Col lg="2" xs="12">
                 <FormGroup>
                   <Label>
                     Campaign ID:
@@ -102,7 +118,7 @@ const CreateDCP = () => {
                   </Label>
                 </FormGroup>
               </Col>
-              <Col>
+              <Col lg="2" xs="12">
                 <FormGroup>
                   <Label>
                     Creative ID:
@@ -110,7 +126,7 @@ const CreateDCP = () => {
                   </Label>
                 </FormGroup>
               </Col>
-              <Col>
+              <Col lg="2" xs="12">
                 <FormGroup>
                   <Label>
                     Traffic Source:
@@ -120,7 +136,7 @@ const CreateDCP = () => {
               </Col>
             </Row>
             <Row>
-              <Col>
+            <Col lg={{ size: 2, offset: 1 }} xs="12">
                 <FormGroup>
                   <Label>
                     S1:
@@ -128,7 +144,7 @@ const CreateDCP = () => {
                   </Label>
                 </FormGroup>
               </Col>
-              <Col>
+              <Col lg="2" xs="12">
                 <FormGroup>
                   <Label>
                     S2:
@@ -136,7 +152,7 @@ const CreateDCP = () => {
                   </Label>
                 </FormGroup>
               </Col>
-              <Col>
+              <Col lg="2" xs="12">
                 <FormGroup>
                   <Label>
                     S3:
@@ -144,7 +160,7 @@ const CreateDCP = () => {
                   </Label>
                 </FormGroup>
               </Col>
-              <Col>
+              <Col lg="2" xs="12">
                 <FormGroup>
                   <Label>
                     S4:
@@ -152,7 +168,7 @@ const CreateDCP = () => {
                   </Label>
                 </FormGroup>
               </Col>
-              <Col>
+              <Col lg="2" xs="12">
                 <FormGroup>
                   <Label>
                     S5:
@@ -167,12 +183,20 @@ const CreateDCP = () => {
       <Row>
         <Col>
           <Label>Your Link:</Label>
-          <div className="link-container">{dcpState}</div>
+          <div className="link-container">{dcpState.replace('?&', '?')}</div>
         </Col>
       </Row>
       <Row>
-        <Col>
-          <Button onClick={save}>Copy to Clipboard</Button>
+        <Col lg="6" xs="12">
+          <Button color="success" onClick={save}>
+            Copy to Clipboard
+          </Button>
+          <p className={`${copied ? 'copied-shown' : 'copied-hidden'}`}>Url Copied!</p>
+        </Col>
+        <Col lg="6" xs="12">
+          <Button color="secondary" onClick={restart}>
+            Restart
+          </Button>
         </Col>
       </Row>
     </Container>

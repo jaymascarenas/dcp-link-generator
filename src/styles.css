@@ -20,18 +20,18 @@ body {
 }
 
 .header {
-  color: green;
+  color: #BC6159;
   margin-bottom: 5px;
 }
 
 .container {
   width: 80%;
   margin: 0 auto;
-  padding: 20px;
-  border: 2px solid green;
+  margin-top: 5%;
+  padding: 40px 40px 20px 40px;
+  border: 2px solid #BC6159;
   border-radius: 5px;
   background: #ffffff;
-  margin-top: 20%;
   -webkit-box-shadow: 6px 4px 15px 4px rgba(0, 0, 0, 0.73);
   box-shadow: 6px 4px 15px 4px rgba(0, 0, 0, 0.73);
 }
@@ -42,13 +42,12 @@ body {
 }
 
 .container p {
-  font-size: 11px;
+  font-size: 14px;
   margin: 0 auto;
   width: 50%;
 }
 
 .container button {
-  background: rgb(0, 128, 1);
   color: #ffffff;
   width: 50%;
   padding: 15px;
@@ -60,7 +59,6 @@ body {
 }
 
 .container button:hover {
-  background: rgba(0, 128, 1, 0.75);
   cursor: pointer;
 }
 
@@ -72,10 +70,54 @@ body {
 }
 
 label {
+  width: 100%;
   text-align: left;
 }
 
-@media(max-width:321px) {
+.copied-shown {
+  color: #BC6159;
+  opacity: 1;
+  transition: all 250ms linear;
+}
+
+.copied-hidden {
+  opacity: 0;
+  transition: all 250ms linear;
+}
+
+@media (max-width: 767px) {
+  body {
+    background: none;
+  }
+  .container {
+    width: 100%;
+  }
+  .container p {
+    width: 100%;
+  }
+  .container button {
+    width: 100%;
+  }
+
+  label {
+    text-align: center;
+  }
+
+  .link-container {
+    word-break: break-all;
+  }
+
+  .copied-shown, .copied-hidden {
+    padding: 0 0 20px;
+  }
+
+}
+
+@media (max-width: 401px) {
+  .container {
+    border: none;
+    margin-top: 0;
+  }
   .container h2 {
     font-size: 20px;
   }
